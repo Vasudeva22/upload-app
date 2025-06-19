@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}File Decoder{% endblock %}
+
+{% block content %}
+<h1>File Decoder</h1>
+{% if message %}
+<div class="alert alert-success" role="alert">
+    {{ message }}
+</div>
+{% endif %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Upload File</h5>
+                <form action="{{ url_for('decoder') }}" method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Choose a file to upload</label>
+                        <input type="file" class="form-control" id="file" name="file" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Upload to S3</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
