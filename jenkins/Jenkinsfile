@@ -29,6 +29,7 @@ pipeline {
                 sh '''
                 terraform init
                 terraform apply -auto-approve -target=aws_ecr_repository.my_app
+                terraform destroy -auto-approve
                 '''
                 }
             }
