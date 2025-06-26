@@ -27,6 +27,7 @@ pipeline {
         stage('Create ECR Repo') {
             steps{ dir('upload-app/terraform'){
                 sh '''
+                terraform import aws_ecr_repository.my_app my-app
                 terraform init
                 terraform apply -auto-approve -target=aws_ecr_repository.my_app
                 terraform destroy -auto-approve
