@@ -24,6 +24,14 @@ pipeline {
                     '''
                 }
             }
+        stage('Create ECR Repo') {
+            steps {
+                sh '''
+                terraform init
+                terraform apply -auto-approve -target=aws_ecr_repository.my_app
+                '''
+                }
+            }
 
             stage('Build Docker Image') {
                 steps{
@@ -34,16 +42,19 @@ pipeline {
                         docker tag s3upload:latest 116981809630.dkr.ecr.us-east-1.amazonaws.com/s3upload:latest
                         '''
                         
-                        //log in to Amazon ECR
-                        sh'''
-                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 116981809630.dkr.ecr.us-east-1.amazonaws.com
-                        '''
+
                     }
                 }
             }
             stage('Push Docker Image to ECR') {
                 steps {
                     script {
+                        
+                        //log in to Amazon ECR
+                        sh'''
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 116981809630.dkr.ecr.us-east-1.amazonaws.com
+                        '''
+
                         //Push the docker image to ECR
                         sh 'docker push 116981809630.dkr.ecr.us-east-1.amazonaws.com/s3upload:latest'
                     }
