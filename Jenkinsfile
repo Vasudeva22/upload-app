@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        AWS_ACCOUNT_ID = '116981809630'
+        AWS_REGION = 'us-east-1'
+        ECR_REPO_NAME = 's3upload'
+        DOCKER_IMAGE = "116981809630.dkr.ecr.us-east-1.amazonaws.com/s3upload"
+    }
+
+        stages {
+            stage('Clone Repository') {
+                steps{
+
+                    //git url: 'https://github.com/Vasudeva22/Project_breed.git'
+                    //git https://github.com/Vasudeva22/Project_breed.git
+                    // Use git clone to clone the specified repository
+                    //sh 'git clone https://github.com/Vasudeva22/Project_breed.git'
+                    sh '''
+                    if [ -d "upload-app" ]; then
+                    rm -rf upload-app
+                    fi
+                    git clone https://github.com/Vasudeva22/upload-app.git
+                    '''
+                }
+            }
+
+            stage('Build Docker Image') {
+                steps{
+                    script {
+
+                        //Build Docker image
+                        sh '''docker build -t s3upload .
+                        docker tag s3upload:latest 116981809630.dkr.ecr.us-east-1.amazonaws.com/s3upload:latest
+                        '''
+                        
+                        //log in to Amazon ECR
+                        sh'''
+                        aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 116981809630.dkr.ecr.us-east-1.amazonaws.com
+                        '''
+                    }
+                }
+            }
+            stage('Push Docker Image to ECR') {
+                steps {
+                    script {
+                        //Push the docker image to ECR
+                        sh 'docker push 116981809630.dkr.ecr.us-east-1.amazonaws.com/s3upload:latest'
+                    }
+                }
+            }
+            stage('Deploy to ECS') {
+                steps {
+                    script {
+                        //Update ECS service to use new image 
+                        sh '''
+                          aws ecs update-service --cluster s3-bucket-upload \
+                                           --service s3_upload-service-p08mhig2 \
+                                           --force-new-deployment \
+                                           --region us-east-1
+                        '''
+                        echo "ECS deployment triggered successfully!"
+                    }
+                }
+            }
+        }
+}
