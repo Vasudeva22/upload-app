@@ -27,6 +27,7 @@ pipeline {
         stage('Create ECR Repo') {
             steps {
                 sh '''
+                cd terraform
                 terraform init
                 terraform apply -auto-approve -target=aws_ecr_repository.my_app
                 '''
@@ -60,6 +61,14 @@ pipeline {
                     }
                 }
             }
+            stage('Full Terraform Apply') {
+                steps {
+                    sh '''
+                    terraform apply -auto-approve
+                    '''
+                    }
+                }
+
             stage('Deploy to ECS') {
                 steps {
                     script {
