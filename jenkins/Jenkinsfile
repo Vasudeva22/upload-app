@@ -25,18 +25,16 @@ pipeline {
                 }
             }
         stage('Create ECR Repo') {
-            steps {
+            steps dir('../terraform'){
                 sh '''
-                cd terraform
                 terraform init
                 terraform apply -auto-approve -target=aws_ecr_repository.my_app
-                cd..
                 '''
                 }
             }
 
             stage('Build Docker Image') {
-                steps{
+                stepsdir('../App'){
                     script {
 
                         //Build Docker image
